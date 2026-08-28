@@ -1878,6 +1878,60 @@ Output: |
    - TC-CANCEL-040 requires order > 24 hours old
 
 Tool: Cursor AI
-Time:
-Prompt:
-Output:
+Time: 2026-08-28 21:50:00 (UTC+7)
+Prompt: |
+  generate cho forgot-password đi, generate cả file md và json đồ nha.
+  (forgot-password api chứ không phải reset-password đâu)
+
+Output: |
+  Generated test artifacts for the Forgot Password API (FR-03), specifically
+  `POST /api/forgot-password`, not `POST /api/reset-password`.
+
+  Source files consulted:
+  - `eshop-sut/api_specification.md`
+  - `eshop-sut/backend/server.js`
+  - `eshop-sut/backend/database.js`
+
+  API details identified:
+  - Endpoint: `POST /api/forgot-password`
+  - Request body: `{ "email": "test@domain.com" }`
+  - Auth required: No
+  - Success response: `200 OK` with `message` and `resetToken`
+  - Seeded valid emails:
+    - `admin@eshop.com`
+    - `lgbao23@clc.fitus.edu.vn`
+    - `test@eshop.com`
+
+  Files created:
+  - `forgot-password.md`
+  - `FR3_Forgot_Password.postman_collection.json`
+  - `FR3_Local.postman_environment.json`
+
+  Generated content summary:
+  - Created 45 forgot-password test cases.
+  - Covered valid seeded emails, invalid email format partitions, missing/null
+    email, wrong JSON schema, malformed JSON, wrong HTTP methods, wrong or
+    missing content type, SQL injection, XSS/HTML injection, command-like
+    payloads, header/newline injection, account enumeration, rate limiting,
+    and concurrent token-generation probes.
+  - Added Postman collection variables and environment variables:
+    `baseUrl`, `studentId`, and `authToken`.
+  - Added `X-Student-Id: {{studentId}}` header to every request.
+  - Used one clear status-code assertion per test case, following the style of
+    `FR10_Cancel_Order.postman_collection.json`.
+  - Added schema checks for success and error response cases.
+
+  Verification performed:
+  - Parsed `FR3_Forgot_Password.postman_collection.json` successfully as JSON.
+  - Parsed `FR3_Local.postman_environment.json` successfully as JSON.
+  - Confirmed the generated collection contains 45 request items.
+
+  Important notes:
+  - The backend currently returns `resetToken` directly in the forgot-password
+    response. This is useful for testing but should be treated as a potential
+    security issue in a real system.
+  - The backend currently returns `404 User not found` for non-existent email,
+    which may reveal whether an account exists. TC-FP-014 documents this as an
+    information-disclosure/account-enumeration test.
+  - The backend does not appear to implement forgot-password rate limiting.
+    TC-FP-040 expects `429 Too Many Requests` to expose that missing control.
