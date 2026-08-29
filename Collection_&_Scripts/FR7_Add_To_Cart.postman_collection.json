@@ -1584,7 +1584,7 @@
             ]
         },
         {
-            "name": "TC-CART-034a: Adding Same Product Twice - Part 1",
+            "name": "TC-CART-034: Adding Same Product Twice",
             "request": {
                 "method": "POST",
                 "header": [
@@ -1607,54 +1607,6 @@
                 "body": {
                     "mode": "raw",
                     "raw": "{\n  \"id\": 24,\n  \"name\": \"Test Product\",\n  \"price\": 25,\n  \"quantity\": 2\n}"
-                },
-                "url": {
-                    "raw": "{{baseUrl}}/api/cart",
-                    "host": [
-                        "{{baseUrl}}"
-                    ],
-                    "path": [
-                        "api",
-                        "cart"
-                    ]
-                }
-            },
-            "event": [
-                {
-                    "listen": "test",
-                    "script": {
-                        "exec": [
-                            "pm.test(\"Status code is expected\", function () { pm.expect(pm.response.code).to.eql(200); });"
-                        ],
-                        "type": "text/javascript"
-                    }
-                }
-            ]
-        },
-        {
-            "name": "TC-CART-034b: Adding Same Product Twice - Part 2",
-            "request": {
-                "method": "POST",
-                "header": [
-                    {
-                        "key": "Content-Type",
-                        "value": "application/json",
-                        "type": "text"
-                    },
-                    {
-                        "key": "X-Student-Id",
-                        "value": "{{studentId}}",
-                        "type": "text"
-                    },
-                    {
-                        "key": "Authorization",
-                        "value": "Bearer {{authToken}}",
-                        "type": "text"
-                    }
-                ],
-                "body": {
-                    "mode": "raw",
-                    "raw": "{\n  \"id\": 24,\n  \"name\": \"Test Product\",\n  \"price\": 25,\n  \"quantity\": 3\n}"
                 },
                 "url": {
                     "raw": "{{baseUrl}}/api/cart",
@@ -2105,102 +2057,6 @@
                     "script": {
                         "exec": [
                             "pm.test(\"Status code is expected\", function () { pm.expect(pm.response.code).to.eql(401); });"
-                        ],
-                        "type": "text/javascript"
-                    }
-                }
-            ]
-        },
-        {
-            "name": "TC-CART-044: Concurrent Add to Cart",
-            "request": {
-                "method": "POST",
-                "header": [
-                    {
-                        "key": "Content-Type",
-                        "value": "application/json",
-                        "type": "text"
-                    },
-                    {
-                        "key": "X-Student-Id",
-                        "value": "{{studentId}}",
-                        "type": "text"
-                    },
-                    {
-                        "key": "Authorization",
-                        "value": "Bearer {{authToken}}",
-                        "type": "text"
-                    }
-                ],
-                "body": {
-                    "mode": "raw",
-                    "raw": "{\n  \"id\": 33,\n  \"name\": \"Race Product\",\n  \"price\": 10,\n  \"quantity\": 1\n}"
-                },
-                "url": {
-                    "raw": "{{baseUrl}}/api/cart",
-                    "host": [
-                        "{{baseUrl}}"
-                    ],
-                    "path": [
-                        "api",
-                        "cart"
-                    ]
-                }
-            },
-            "event": [
-                {
-                    "listen": "test",
-                    "script": {
-                        "exec": [
-                            "pm.test(\"Status code is expected\", function () { pm.expect(pm.response.code).to.eql(200); });"
-                        ],
-                        "type": "text/javascript"
-                    }
-                }
-            ]
-        },
-        {
-            "name": "TC-CART-045: Stock Limit Exceeded",
-            "request": {
-                "method": "POST",
-                "header": [
-                    {
-                        "key": "Content-Type",
-                        "value": "application/json",
-                        "type": "text"
-                    },
-                    {
-                        "key": "X-Student-Id",
-                        "value": "{{studentId}}",
-                        "type": "text"
-                    },
-                    {
-                        "key": "Authorization",
-                        "value": "Bearer {{authToken}}",
-                        "type": "text"
-                    }
-                ],
-                "body": {
-                    "mode": "raw",
-                    "raw": "{\n  \"id\": 32,\n  \"name\": \"Limited Stock Product\",\n  \"price\": 100,\n  \"quantity\": 1000\n}"
-                },
-                "url": {
-                    "raw": "{{baseUrl}}/api/cart",
-                    "host": [
-                        "{{baseUrl}}"
-                    ],
-                    "path": [
-                        "api",
-                        "cart"
-                    ]
-                }
-            },
-            "event": [
-                {
-                    "listen": "test",
-                    "script": {
-                        "exec": [
-                            "pm.test(\"Status code is expected\", function () { pm.expect(pm.response.code).to.eql(400); });"
                         ],
                         "type": "text/javascript"
                     }

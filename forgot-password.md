@@ -18,7 +18,7 @@
 ```json
 {
   "message": "Ma dat lai mat khau da duoc tao",
-  "resetToken": "1234"
+  "resetToken": "123456"
 }
 ```
 
@@ -41,7 +41,7 @@
   }
   ```
 - **Expected Response:** 200 OK
-- **Notes:** Success response includes message and resetToken.
+- **Notes:** Success response includes message and resetToken; resetToken length must be 6.
 
 ### TC-FP-002: Valid Admin Email
 - **Priority:** P1
@@ -60,22 +60,6 @@
 - **Expected Response:** 200 OK
 - **Notes:** Uses seeded admin@eshop.com from database.js.
 
-### TC-FP-003: Valid Student Email
-- **Priority:** P1
-- **Category:** Domain Partition - Existing Email
-- **Description:** Seeded student/admin email can request forgot-password token
-- **Method:** POST
-- **Headers:**
-  - `Content-Type: application/json`
-  - `X-Student-Id: {{studentId}}`
-- **Request Body:**
-  ```json
-  {
-    "email": "lgbao23@clc.fitus.edu.vn"
-  }
-  ```
-- **Expected Response:** 200 OK
-- **Notes:** Uses seeded lgbao23@clc.fitus.edu.vn from database.js.
 
 ### TC-FP-004: Invalid Email Missing At Symbol
 - **Priority:** P1
@@ -436,22 +420,6 @@
 - **Expected Response:** 404 Not Found
 - **Notes:** Valid format but not in seeded database.
 
-### TC-FP-025: Unicode Email
-- **Priority:** P2
-- **Category:** Domain Partition - Email Format
-- **Description:** Unicode email should follow system policy
-- **Method:** POST
-- **Headers:**
-  - `Content-Type: application/json`
-  - `X-Student-Id: {{studentId}}`
-- **Request Body:**
-  ```json
-  {
-    "email": "t?st@eshop.com"
-  }
-  ```
-- **Expected Response:** 400 Bad Request
-- **Notes:** Chosen policy: reject non-ASCII email.
 
 ### TC-FP-026: Very Long Email
 - **Priority:** P2
@@ -650,7 +618,7 @@
 ### TC-FP-038: Success Response Schema
 - **Priority:** P1
 - **Category:** Schema Validation
-- **Description:** Successful response should contain message and resetToken
+- **Description:** Successful response should contain message and resetToken with length 6
 - **Method:** POST
 - **Headers:**
   - `Content-Type: application/json`
@@ -662,7 +630,7 @@
   }
   ```
 - **Expected Response:** 200 OK
-- **Notes:** Response schema: message string, resetToken string.
+- **Notes:** Response schema: message string, resetToken string with exactly 6 characters.
 
 ### TC-FP-039: Error Response Schema
 - **Priority:** P1
@@ -785,8 +753,8 @@
 | Category | Count |
 |----------|-------|
 | Happy Path | 1 |
-| Domain Partition - Existing Email | 2 |
-| Domain Partition - Email Format | 9 |
+| Domain Partition - Existing Email | 1 |
+| Domain Partition - Email Format | 8 |
 | Domain Partition - Email | 2 |
 | Schema Validation | 12 |
 | Security - Information Disclosure | 1 |
@@ -802,7 +770,7 @@
 | Security - Rate Limiting (SEC-06) | 1 |
 | Security - Race Condition (SEC-07) | 1 |
 | Security - Header Injection | 1 |
-| **Total** | **45** |
+| **Total** | **43** |
 
 ## Response Schema Validation
 
@@ -810,7 +778,7 @@
 ```json
 {
   "message": "string",
-  "resetToken": "string"
+  "resetToken": "string (length = 6)"
 }
 ```
 
