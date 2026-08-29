@@ -16,29 +16,65 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # =========================
+      # Checkout
+      # =========================
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # =========================
+      # Node.js
+      # =========================
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
+      # =========================
+      # Backend
+      # =========================
+      - name: Install backend dependencies
+        working-directory: eshop-sut/backend
+        run: npm ci
+
+      - name: Start backend
+        working-directory: eshop-sut/backend
+        run: |
+          npm start > backend.log 2>&1 &
+
+      - name: Wait for backend
+        run: |
+          echo "Waiting for backend..."
+
+          for i in {1..30}; do
+            if curl -s http://localhost:3000 > /dev/null; then
+              echo "Backend is running!"
+              exit 0
+            fi
+
+            echo "Backend is not ready yet..."
+            sleep 2
+          done
+
+          echo "Backend failed to start."
+          echo "========== Backend log =========="
+          cat eshop-sut/backend/backend.log
+          exit 1
+
+      # =========================
+      # Newman
+      # =========================
       - name: Install Newman and HTML Extra Reporter
         run: |
           npm install -g newman
           npm install -g newman-reporter-htmlextra
 
-      # Start your backend here if it is part of the repository
-      # - name: Install backend dependencies
-      #   run: npm install
-      #
-      # - name: Start backend
-      #   run: npm start &
-
       - name: Create reports directory
         run: mkdir -p reports
 
+      # =========================
+      # FR10 - Cancel Order
+      # =========================
       - name: Run FR10 - Cancel Order
         run: |
           newman run Collections_And_Scripts/FR10_Cancel_Order.postman_collection.json \
@@ -46,6 +82,9 @@ jobs:
             -r cli,htmlextra \
             --reporter-htmlextra-export reports/FR10_Cancel_Order_Report.html
 
+      # =========================
+      # Upload reports
+      # =========================
       - name: Upload Newman Reports
         if: always()
         uses: actions/upload-artifact@v4
