@@ -1,0 +1,54 @@
+name: API Tests - Newman
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Newman and HTML Extra Reporter
+        run: |
+          npm install -g newman
+          npm install -g newman-reporter-htmlextra
+
+      # Start your backend here if it is part of the repository
+      # - name: Install backend dependencies
+      #   run: npm install
+      #
+      # - name: Start backend
+      #   run: npm start &
+
+      - name: Create reports directory
+        run: mkdir -p reports
+
+      - name: Run FR10 - Cancel Order
+        run: |
+          newman run Collections_And_Scripts/FR10_Cancel_Order.postman_collection.json \
+            -e Collections_And_Scripts/FR10_Local.postman_environment.json \
+            -r cli,htmlextra \
+            --reporter-htmlextra-export reports/FR10_Cancel_Order_Report.html
+
+      - name: Upload Newman Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-api-reports
+          path: reports/
