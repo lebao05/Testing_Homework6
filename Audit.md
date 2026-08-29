@@ -1,649 +1,32 @@
-Tool: Cursor AI
-Time: 2026-08-22 20:15:00 (UTC+7)
-Prompt: |
-  Generate with AI. Provide the SUT's API specification to an AI tool and
-  drive it — step by step, not with a single generic prompt — to generate test
-  cases for the API (target ≥ 35 per API). The cases must cover: domain
-  partitions on every parameter (e.g., email format, password complexity,
-  price > 0), state transitions (FR-10: pending → confirmed → shipping →
-  delivered, plus cancelation rules), security (SEC-01–SEC-07, e.g., SQL
-  injection, IDOR, role escalation), and schema validation (the response
-  shape exactly matches the spec). Generate for reset-password api for me.
-  and create file reset-password.md
+# Faculty of Information Technology (FIT) – Ho Chi Minh City University of Science (HCMUS)
+## CS423 / CSC13003 – Software Testing (AI-augmented · 2026)
+## AI POLICY · TEMPLATES — 2026 v1.0
 
-Output: |
-  Generated 40 test cases for Reset Password API (POST /api/reset-password).
-  File created: reset-password.md
+# AI Audit Report — 5-section Template per Artifact
 
-  FULL OUTPUT (reset-password.md content):
-
-# Test Cases — Reset Password API (FR-03)
-
-**Endpoint:** `POST /api/reset-password`
-**Base URL:** `http://localhost:3000`
-**Auth Required:** No
-
-## API Specification
-
-**Request Body:**
-```json
-{
-  "email": "test@domain.com",
-  "resetToken": "123456",
-  "newPassword": "NewPassword123!"
-}
-```
+*Mandatory appendix for every AI-assisted homework (HW#01–HW#06, and Seminar).*  
+*Adapted from Med Kharbach, PhD (2026) — AI Use Policy Templates for Higher Education. CC BY-NC-SA 4.0. This adaptation is prepared for FIT@HCMUS – CS423 / CSC15003 Software Testing course.*
 
 ---
 
-## Test Case List
+## 1. Student Information
 
-### TC-RP-001: Valid Reset Password Request
-- **Priority:** P0 (Critical)
-- **Category:** Happy Path
-- **Description:** Valid email, token, and password should reset successfully
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 200 OK, success message
-- **Test Data:** Valid email format, valid 6-digit token, password meeting complexity requirements
-
-### TC-RP-002: Invalid Email Format — Missing @ Symbol
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Email
-- **Description:** Email without @ symbol should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "testdomain.com",
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-- **Test Data:** Invalid email format
-
-### TC-RP-003: Invalid Email Format — Missing Domain
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Email
-- **Description:** Email without domain should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@",
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-004: Invalid Email Format — Missing Local Part
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Email
-- **Description:** Email without local part should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "@domain.com",
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-005: Empty Email Field
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Email
-- **Description:** Empty email should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "",
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-006: Null Email Field
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Email
-- **Description:** Null email should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": null,
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-007: SQL Injection in Email Field
-- **Priority:** P0 (Critical)
-- **Category:** Security — SQL Injection (SEC-01)
-- **Description:** SQL injection payload should be sanitized and not execute
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com' OR '1'='1",
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request or 200 with appropriate handling (no SQL execution)
-- **Security Check:** Verify no SQL error in response, no data leakage
-
-### TC-RP-008: SQL Injection with UNION Attack
-- **Priority:** P0 (Critical)
-- **Category:** Security — SQL Injection (SEC-01)
-- **Description:** UNION-based SQL injection should be blocked
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com' UNION SELECT * FROM users--",
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request (no data exposure)
-
-### TC-RP-009: XSS Payload in Email Field
-- **Priority:** P1 (High)
-- **Category:** Security — XSS (SEC-02)
-- **Description:** XSS payload should be sanitized
-- **Request Body:**
-  ```json
-  {
-    "email": "<script>alert('XSS')</script>@domain.com",
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request or sanitized input
-
-### TC-RP-010: Invalid Reset Token — Wrong Token Format (Letters)
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Reset Token
-- **Description:** Non-numeric token should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "abcdef",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-011: Invalid Reset Token — Wrong Token Format (Special Characters)
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Reset Token
-- **Description:** Token with special characters should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123@456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-012: Empty Reset Token
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Reset Token
-- **Description:** Empty token should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-013: Null Reset Token
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Reset Token
-- **Description:** Null token should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": null,
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-014: Expired Reset Token
-- **Priority:** P0 (Critical)
-- **Category:** State Transition — Token Expiry
-- **Description:** Expired token should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "999999",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400/401 Bad Request with "expired" or "invalid" error
-- **Prerequisite:** Token must be expired in test data
-
-### TC-RP-015: Already Used Reset Token
-- **Priority:** P0 (Critical)
-- **Category:** State Transition — Token Reuse
-- **Description:** Token already used for reset should not work again
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "111111",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400/401 Bad Request with "already used" error
-- **Prerequisite:** Token must have been used before in test data
-
-### TC-RP-016: Wrong Reset Token for Email
-- **Priority:** P0 (Critical)
-- **Category:** Security — IDOR (SEC-03)
-- **Description:** Token generated for different email should not work
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "222222",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400/401 Bad Request with "invalid token" error
-- **Security Check:** Token should be tied to specific email
-
-### TC-RP-017: Invalid Password — Too Short (Less than 8 chars)
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Password Complexity
-- **Description:** Password less than 8 characters should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123456",
-    "newPassword": "Pass1!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-018: Invalid Password — Missing Uppercase Letter
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Password Complexity
-- **Description:** Password without uppercase should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123456",
-    "newPassword": "password123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-019: Invalid Password — Missing Lowercase Letter
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Password Complexity
-- **Description:** Password without lowercase should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123456",
-    "newPassword": "PASSWORD123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-020: Invalid Password — Missing Number
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Password Complexity
-- **Description:** Password without number should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123456",
-    "newPassword": "PasswordABC!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-021: Invalid Password — Missing Special Character
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Password Complexity
-- **Description:** Password without special character should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123456",
-    "newPassword": "Password1234"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-022: Empty Password Field
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Password
-- **Description:** Empty password should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123456",
-    "newPassword": ""
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-023: Null Password Field
-- **Priority:** P1 (High)
-- **Category:** Domain Partition — Password
-- **Description:** Null password should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123456",
-    "newPassword": null
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-024: SQL Injection in Password Field
-- **Priority:** P0 (Critical)
-- **Category:** Security — SQL Injection (SEC-01)
-- **Description:** SQL injection in password should be sanitized
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123456",
-    "newPassword": "Pass123!' OR '1'='1"
-  }
-  ```
-- **Expected Response:** 400 Bad Request (password sanitized)
-
-### TC-RP-025: XSS Payload in Password Field
-- **Priority:** P1 (High)
-- **Category:** Security — XSS (SEC-02)
-- **Description:** XSS payload in password should be sanitized
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123456",
-    "newPassword": "<script>alert(1)</script>Pass1!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request or sanitized input
-
-### TC-RP-026: Missing Email Field (Malformed JSON)
-- **Priority:** P1 (High)
-- **Category:** Schema Validation
-- **Description:** Request without email field should be rejected
-- **Request Body:**
-  ```json
-  {
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-027: Missing Reset Token Field
-- **Priority:** P1 (High)
-- **Category:** Schema Validation
-- **Description:** Request without token field should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-028: Missing New Password Field
-- **Priority:** P1 (High)
-- **Category:** Schema Validation
-- **Description:** Request without password field should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123456"
-  }
-  ```
-- **Expected Response:** 400 Bad Request with validation error
-
-### TC-RP-029: Extra Unknown Field in Request
-- **Priority:** P2 (Medium)
-- **Category:** Schema Validation
-- **Description:** Extra fields should be ignored or cause validation error
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!",
-    "extraField": "shouldBeIgnored"
-  }
-  ```
-- **Expected Response:** 200 OK (extra fields ignored) or 400 (strict mode)
-
-### TC-RP-030: Wrong Content-Type Header
-- **Priority:** P2 (Medium)
-- **Category:** Security — Content Type Validation (SEC-04)
-- **Description:** Request with wrong content-type should be handled
-- **Headers:** `Content-Type: text/plain`
-- **Request Body:** Raw string instead of JSON
-- **Expected Response:** 400 Bad Request or 415 Unsupported Media Type
-
-### TC-RP-031: Non-Existent Email (User Not Found)
-- **Priority:** P0 (Critical)
-- **Category:** Security — Information Disclosure (SEC-05)
-- **Description:** Attempting reset for non-existent user should not reveal user existence
-- **Request Body:**
-  ```json
-  {
-    "email": "nonexistent@domain.com",
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** Generic error message (not "User not found")
-- **Security Check:** Should not disclose whether email exists in system
-
-### TC-RP-032: Password Same as Current Password
-- **Priority:** P2 (Medium)
-- **Category:** Business Logic
-- **Description:** New password same as current password should be handled
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123456",
-    "newPassword": "CurrentPassword123!"
-  }
-  ```
-- **Expected Response:** 200 OK or 400 (depending on policy)
-
-### TC-RP-033: Token Case Sensitivity
-- **Priority:** P2 (Medium)
-- **Category:** Domain Partition — Token Format
-- **Description:** Token with uppercase letters should be handled consistently
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123AbC",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** According to spec (numeric-only expected)
-
-### TC-RP-034: Multiple Rapid Reset Attempts
-- **Priority:** P1 (High)
-- **Category:** Security — Rate Limiting (SEC-06)
-- **Description:** Multiple rapid reset attempts should be rate limited
-- **Request:** Send 10+ reset requests in quick succession
-- **Expected Response:** 429 Too Many Requests after threshold
-- **Security Check:** Verify rate limiting is enforced
-
-### TC-RP-035: Invalid JSON Format
-- **Priority:** P1 (High)
-- **Category:** Schema Validation
-- **Description:** Malformed JSON should be rejected
-- **Request Body:** `{email: "test@domain.com", resetToken: "123456", newPassword: "Pass123!"}`
-- **Expected Response:** 400 Bad Request (JSON parsing error)
-
-### TC-RP-036: Very Long Email (>254 chars)
-- **Priority:** P2 (Medium)
-- **Category:** Domain Partition — Email Length
-- **Description:** Email exceeding RFC 5321 limit should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "a@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com",
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 400 Bad Request
-
-### TC-RP-037: Unicode Characters in Email
-- **Priority:** P2 (Medium)
-- **Category:** Domain Partition — Email Format
-- **Description:** Unicode in email should be handled according to policy
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com\u00e9",
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 200 OK or 400 (depending on Unicode support)
-
-### TC-RP-038: Password with Only Special Characters
-- **Priority:** P2 (Medium)
-- **Category:** Domain Partition — Password Complexity
-- **Description:** Password with only special characters should be rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "test@domain.com",
-    "resetToken": "123456",
-    "newPassword": "!@#$%^&*()"
-  }
-  ```
-- **Expected Response:** 400 Bad Request
-
-### TC-RP-039: Concurrent Reset Attempts with Same Token
-- **Priority:** P1 (High)
-- **Category:** Security — Race Condition (SEC-07)
-- **Description:** Two simultaneous requests with same token should be handled atomically
-- **Request:** Send 2 identical reset requests simultaneously
-- **Expected Response:** Only one should succeed, other should fail with "token already used"
-
-### TC-RP-040: Email with Trailing Whitespace
-- **Priority:** P2 (Medium)
-- **Category:** Domain Partition — Email Trimming
-- **Description:** Email with leading/trailing whitespace should be trimmed or rejected
-- **Request Body:**
-  ```json
-  {
-    "email": "  test@domain.com  ",
-    "resetToken": "123456",
-    "newPassword": "NewPassword123!"
-  }
-  ```
-- **Expected Response:** 200 OK (trimmed) or 400 (rejected)
-
----
-
-## Test Case Summary
-
-| Category | Count |
-|----------|-------|
-| Domain Partition — Email | 7 |
-| Domain Partition — Reset Token | 4 |
-| Domain Partition — Password | 8 |
-| Security — SQL Injection | 2 |
-| Security — XSS | 2 |
-| Security — IDOR | 1 |
-| Security — Information Disclosure | 1 |
-| Security — Rate Limiting | 1 |
-| Security — Race Condition | 1 |
-| Security — Content Type | 1 |
-| Schema Validation | 4 |
-| State Transition — Token Expiry | 1 |
-| State Transition — Token Reuse | 1 |
-| Business Logic | 1 |
-| Happy Path | 1 |
-| **Total** | **40** |
-
----
-
-## Response Schema Validation
-
-### Success Response (200 OK)
-```json
-{
-  "message": "string"
-}
-```
-
-### Error Response (400/401/429)
-```json
-{
-  "error": "string"  // or "message": "string"
-}
-```
-
----
-
-## Test Execution Notes
-
-1. **Pre-request Setup:**
-   - User must be registered and have requested password reset via `/api/forgot-password`
-   - Valid `resetToken` should be obtained from forgot-password flow
-   - Set `X-Student-Id` header in all requests
-
-2. **Postman Variables:**
-   ```
-   {{baseUrl}} = http://localhost:3000
-   {{studentId}} = <Your Student ID>
-   ```
-
-3. **Test Execution Order:**
-   - Run TC-RP-001 first to verify basic functionality
-   - Run security tests (TC-RP-007, TC-RP-008, TC-RP-024) carefully
-   - Use Collection Runner for batch execution
+| **Field** | **Value** |
+|---|---|
+| **Student name (printed):** | LÊ GIA BẢO |
+| **Student ID:** | 23127325 |
+| **Class / Cohort:** | KIEM THU PHAN MEM - 23KTPM2 |
+| **Assignment ID:** | HW#06 |
+| **Assignment date:** | 30/8/2026 |
+| **AI tool(s) used:** | ChatGPT, Cursor |
+| **AI assistance used:** | [x] Yes [ ] No |
 
 Tool: Cursor AI
 Time: 2026-08-22 20:27:00 (UTC+7)
 Prompt: |
   1. Generate with AI. Provide the SUT's API specification to an AI tool and
   drive it — step by step, not with a single generic prompt — to generate test
-  cases for the API (target ≥ 35 per API). The cases must cover: domain
+  cases for the API (target >= 30 per API). The cases must cover: domain
   partitions on every parameter (e.g., email format, password complexity,
   price > 0), state transitions (FR-10: pending → confirmed → shipping →
   delivered, plus cancelation rules), security (SEC-01–SEC-07, e.g., SQL
@@ -1214,182 +597,19 @@ Output: |
   }
   ```
 - **Expected Response:** 200 OK (behavior depends on server logic)
+Verdict: Incomplete
+Reasoning (ISTQB): The AI-generated test cases focused mainly on request input validation and did not explicitly verify authentication-related behavior. According to ISTQB Foundation Level, test conditions should be derived from specified requirements and risks. Authentication behavior is an important security-related condition when the API contract defines or enforces authorization. Therefore, this area represented a coverage gap rather than an incorrect AI test case.
+Student Fix: Added TC-FP-031 to explicitly verify the API behavior when a valid Authorization header is provided. The test was added manually to improve security-related coverage and ensure that authentication behavior is evaluated separately from input validation.
 
-### TC-CART-038: Missing Authorization Header (Bearer Prefix)
-- **Priority:** P0 (Critical)
-- **Category:** Security — Authentication (SEC-03)
-- **Description:** Token without Bearer prefix should be rejected
-- **Headers:** `Authorization: some_token_without_bearer`
-- **Expected Response:** 401 Unauthorized
 
-### TC-CART-039: Special Characters in Product Name
-- **Priority:** P2 (Medium)
-- **Category:** Domain Partition — Name
-- **Description:** Special characters should be allowed or rejected
-- **Request Body:**
-  ```json
-  {
-    "id": 28,
-    "name": "Product @#$%^&*()",
-    "price": 25.00,
-    "quantity": 1
-  }
-  ```
-- **Expected Response:** 200 OK (allowed) or 400 (special chars not allowed)
 
-### TC-CART-040: Floating Point Precision in Price
-- **Priority:** P2 (Medium)
-- **Category:** Domain Partition — Price
-- **Description:** Floating point issues should be handled
-- **Request Body:**
-  ```json
-  {
-    "id": 29,
-    "name": "Precise Product",
-    "price": 0.1 + 0.2,
-    "quantity": 1
-  }
-  ```
-- **Expected Response:** 200 OK with 0.3 or validation error for precision
-
-### TC-CART-041: Very Small Positive Price
-- **Priority:** P2 (Medium)
-- **Category:** Domain Partition — Price
-- **Description:** Minimum price value should be handled
-- **Request Body:**
-  ```json
-  {
-    "id": 30,
-    "name": "Cheap Product",
-    "price": 0.01,
-    "quantity": 1
-  }
-  ```
-- **Expected Response:** 200 OK (minimum price accepted)
-
-### TC-CART-042: Negative Price via Type Coercion
-- **Priority:** P0 (Critical)
-- **Category:** Security — Input Validation (SEC-04)
-- **Description:** Negative price via string should be rejected
-- **Request Body:**
-  ```json
-  {
-    "id": 31,
-    "name": "Test Product",
-    "price": "-10.00",
-    "quantity": 1
-  }
-  ```
-- **Expected Response:** 400 Bad Request (string to number coercion + validation)
-
-### TC-CART-043: No Bearer Token (Basic Auth Instead)
-- **Priority:** P1 (High)
-- **Category:** Security — Authentication (SEC-03)
-- **Description:** Wrong auth type should be rejected
-- **Headers:** `Authorization: Basic dXNlcjpwYXNz`
-- **Expected Response:** 401 Unauthorized
-
-### TC-CART-044: Concurrent Add to Cart
-- **Priority:** P1 (High)
-- **Category:** Security — Race Condition (SEC-07)
-- **Description:** Multiple simultaneous adds should be handled atomically
-- **Request:** Send 5 identical add-to-cart requests simultaneously
-- **Expected Response:** All succeed or appropriate error handling
-
-### TC-CART-045: Stock Limit Exceeded
-- **Priority:** P1 (High)
-- **Category:** Business Logic
-- **Description:** Adding more than available stock should be handled
-- **Prerequisite:** Product has limited stock
-- **Request Body:**
-  ```json
-  {
-    "id": 32,
-    "name": "Limited Stock Product",
-    "price": 100.00,
-    "quantity": 1000
-  }
-  ```
-- **Expected Response:** 200 OK (capped) or 400 (exceeds available stock)
-
----
-
-## Test Case Summary
-
-| Category | Count |
-|----------|-------|
-| Domain Partition — Price | 6 |
-| Domain Partition — Quantity | 4 |
-| Domain Partition — ID | 3 |
-| Domain Partition — Name | 4 |
-| Security — SQL Injection | 4 |
-| Security — XSS | 1 |
-| Security — Authentication | 4 |
-| Security — Input Validation | 1 |
-| Security — Race Condition | 1 |
-| Schema Validation | 6 |
-| Business Logic | 5 |
-| State Transition — Cart State | 1 |
-| Happy Path | 1 |
-| **Total** | **45** |
-
----
-
-## Response Schema Validation
-
-### Success Response (200 OK)
-```json
-{
-  "message": "string",
-  "cartItem": {
-    "id": "number",
-    "name": "string",
-    "price": "number",
-    "quantity": "number"
-  }
-}
-```
-
-### Error Response (400/401/404)
-```json
-{
-  "error": "string"  // or "message": "string"
-}
-```
-
----
-
-## Test Execution Notes
-
-1. **Pre-request Setup:**
-   - User must be logged in and have valid JWT token
-   - Test products should be pre-created in database
-   - Set `Authorization: Bearer {{token}}` header
-   - Set `X-Student-Id` header in all requests
-
-2. **Postman Variables:**
-   ```
-   {{baseUrl}} = http://localhost:3000
-   {{studentId}} = <Your Student ID>
-   {{authToken}} = <JWT token from login>
-   ```
-
-3. **Test Execution Order:**
-   - Run TC-CART-001 first to verify basic functionality
-   - Run authentication tests (TC-CART-024 to TC-CART-026) to verify auth
-   - Run security tests (TC-CART-016 to TC-CART-018, TC-CART-027 to TC-CART-028)
-   - Use Collection Runner for batch execution
-
-4. **State Management:**
-   - Clear cart before running tests to ensure clean state
-   - Some tests require specific pre-existing cart state
 
 Tool: Cursor AI
 Time: 2026-08-22 20:34:00 (UTC+7)
 Prompt: |
   1. Generate with AI. Provide the SUT's API specification to an AI tool and
   drive it — step by step, not with a single generic prompt — to generate test
-  cases for the API (target >= 35( per API). The cases must cover: domain
+  cases for the API (target >= 30( per API). The cases must cover: domain
   partitions on every parameter (e.g., email format, password complexity,
   price > 0), state transitions (FR-10: pending → confirmed → shipping →
   delivered, plus cancelation rules), security (SEC-01–SEC-07, e.g., SQL
@@ -1397,7 +617,7 @@ Prompt: |
   shape exactly matches the spec). for PUT /api/orders/:id/cancel
 
 Output: |
-  Generated 45 test cases for Cancel Order API (PUT /api/orders/:id/cancel).
+  Generated 30 test cases for Cancel Order API (PUT /api/orders/:id/cancel).
   File created: cancel-order.md
 
   FULL OUTPUT (cancel-order.md content):
@@ -1648,234 +868,14 @@ Output: |
 - **Description:** ID with special characters should be rejected
 - **Request:** `PUT /api/orders/1@#$/cancel`
 - **Expected Response:** 400 Bad Request
+Verdict:Incomplete
+(4) Reasoning (ISTQB)
 
-### TC-CANCEL-031: Verify Cancel Response Schema
-- **Priority:** P1 (High)
-- **Category:** Schema Validation — Response
-- **Description:** Success response must match expected schema
-- **Expected Response Schema:**
-  ```json
-  {
-    "message": "string",
-    "order": {
-      "id": "number",
-      "status": "string",
-      "updatedAt": "string (ISO date)"
-    }
-  }
-  ```
+INCOMPLETE — The AI provided broad coverage of state transitions, input partitions, authentication, security, and malformed requests. However, several cases use assumptions that are not established by the API specification, such as whether confirmed orders can be cancelled (TC-CANCEL-002), whether the operation is admin-only (TC-CANCEL-024), and whether rate limiting is implemented (TC-CANCEL-025). Some expected results are also overly broad, for example 400 or 404 and 200 or 400, which makes the expected behavior non-deterministic. In addition, cases such as XSS through an unspecified custom header (TC-CANCEL-019) and extra request fields (TC-CANCEL-023) are not justified by the endpoint contract. According to ISTQB Foundation Level, Black-box Test Techniques, test conditions and expected results should be derived from specified behavior, while State Transition Testing requires clearly defined valid and invalid transitions. Therefore, the generated set provides useful coverage but requires human validation against the actual SUT and specification.
 
-### TC-CANCEL-032: Verify Error Response Schema
-- **Priority:** P1 (High)
-- **Category:** Schema Validation — Response
-- **Description:** Error response must match expected schema
-- **Expected Response Schema:**
-  ```json
-  {
-    "error": "string"
-  }
-  ```
-  or
-  ```json
-  {
-    "message": "string"
-  }
-  ```
+(5) Student Fix
 
-### TC-CANCEL-033: Cancel Order After Refund Processed
-- **Priority:** P2 (Medium)
-- **Category:** Business Logic
-- **Description:** Order with processed refund should have special handling
-- **Prerequisite:** Order refund already processed
-- **Expected Response:** 400 Bad Request or special error message
-
-### TC-CANCEL-034: Cancel Order with Missing Content-Type Header
-- **Priority:** P2 (Medium)
-- **Category:** Schema Validation
-- **Description:** Request without Content-Type should be handled
-- **Headers:** No `Content-Type` header
-- **Expected Response:** 200 OK (Content-Type optional for PUT)
-
-### TC-CANCEL-035: Cancel Order with Wrong HTTP Method
-- **Priority:** P1 (High)
-- **Category:** Schema Validation
-- **Description:** Using POST instead of PUT should be rejected
-- **Request:** `POST /api/orders/1/cancel`
-- **Expected Response:** 405 Method Not Allowed
-
-### TC-CANCEL-036: Cancel Order with Wrong HTTP Method (GET)
-- **Priority:** P1 (High)
-- **Category:** Schema Validation
-- **Description:** Using GET instead of PUT should be rejected
-- **Request:** `GET /api/orders/1/cancel`
-- **Expected Response:** 405 Method Not Allowed
-
-### TC-CANCEL-037: Cancel Order with DELETE Method
-- **Priority:** P1 (High)
-- **Category:** Schema Validation
-- **Description:** Using DELETE instead of PUT should be rejected
-- **Request:** `DELETE /api/orders/1/cancel`
-- **Expected Response:** 405 Method Not Allowed or 400
-
-### TC-CANCEL-038: Verify Order Status Changed to "cancelled"
-- **Priority:** P0 (Critical)
-- **Category:** State Transition — Verification
-- **Description:** After cancellation, order status must be "cancelled"
-- **Test Flow:** 
-  1. Create order
-  2. Cancel order
-  3. GET order details
-  4. Verify status === "cancelled"
-- **Expected Response:** Status field contains "cancelled"
-
-### TC-CANCEL-039: Cancel Order with Unicode ID
-- **Priority:** P2 (Medium)
-- **Category:** Domain Partition — ID Validation
-- **Description:** Unicode characters in ID should be handled
-- **Request:** `PUT /api/orders/测试/cancel`
-- **Expected Response:** 400 Bad Request
-
-### TC-CANCEL-040: Cancel Order After Cancellation Window Expires
-- **Priority:** P2 (Medium)
-- **Category:** Business Logic — Time-Based Rules
-- **Description:** Cancellation window (e.g., 24 hours) should be enforced
-- **Prerequisite:** Order created > 24 hours ago
-- **Expected Response:** 400 Bad Request with "window expired" error
-
-### TC-CANCEL-041: Cancel Order with Partial ID Match
-- **Priority:** P2 (Medium)
-- **Category:** Security — ID Validation
-- **Description:** Trailing slash should not affect cancellation
-- **Request:** `PUT /api/orders/1//cancel`
-- **Expected Response:** 404 or 400 Bad Request
-
-### TC-CANCEL-042: Concurrent Cancel and Update Requests
-- **Priority:** P1 (High)
-- **Category:** Security — Race Condition (SEC-07)
-- **Description:** Simultaneous cancel and status update should be atomic
-- **Request:** Send cancel and status update simultaneously
-- **Expected Response:** Consistent final state
-
-### TC-CANCEL-043: Cancel Order with Expired Session but Valid Token
-- **Priority:** P1 (High)
-- **Category:** Security — Session Validation
-- **Description:** Expired session with valid token should be handled
-- **Headers:** `Authorization: Bearer <valid_token>`
-- **Expected Response:** 200 OK or 401 (depends on auth implementation)
-
-### TC-CANCEL-044: Cancel Order with Malformed UUID (if applicable)
-- **Priority:** P2 (Medium)
-- **Category:** Domain Partition — ID Format
-- **Description:** Invalid UUID format should be rejected
-- **Request:** `PUT /api/orders/550e8400-e29b-41d4-a716-446655440000/cancel`
-- **Expected Response:** 400 Bad Request (if ID is not UUID type)
-
-### TC-CANCEL-045: Verify updatedAt Timestamp After Cancellation
-- **Priority:** P1 (High)
-- **Category:** Business Logic — Timestamp Verification
-- **Description:** updatedAt should be updated on cancellation
-- **Test Flow:**
-  1. Record original updatedAt
-  2. Cancel order
-  3. Verify new updatedAt > original updatedAt
-- **Expected Response:** updatedAt timestamp reflects cancellation time
-
----
-
-## Test Case Summary
-
-| Category | Count |
-|----------|-------|
-| State Transition — Valid Cancellation | 1 |
-| State Transition — Conditional Cancellation | 1 |
-| State Transition — Invalid Cancellation | 3 |
-| State Transition — Verification | 1 |
-| State Transition — Race Condition | 2 |
-| Domain Partition — ID Validation | 8 |
-| Security — SQL Injection | 2 |
-| Security — XSS | 1 |
-| Security — Authentication | 5 |
-| Security — IDOR | 1 |
-| Security — Role Escalation | 1 |
-| Security — Rate Limiting | 1 |
-| Security — Race Condition | 2 |
-| Schema Validation | 8 |
-| Schema Validation — Response | 2 |
-| Business Logic | 4 |
-| Business Logic — Time-Based Rules | 1 |
-| **Total** | **45** |
-
----
-
-## State Transition Matrix
-
-| Current Status | Cancel Allowed? | New Status | Test Case |
-|----------------|-----------------|------------|-----------|
-| pending | Yes | cancelled | TC-CANCEL-001 |
-| confirmed | Depends on policy | cancelled / error | TC-CANCEL-002 |
-| shipping | No | (stays shipping) | TC-CANCEL-003 |
-| delivered | No | (stays delivered) | TC-CANCEL-004 |
-| cancelled | No | (stays cancelled) | TC-CANCEL-005 |
-
----
-
-## Response Schema Validation
-
-### Success Response (200 OK)
-```json
-{
-  "message": "string",
-  "order": {
-    "id": "number",
-    "status": "string",
-    "updatedAt": "string (ISO 8601)"
-  }
-}
-```
-
-### Error Response (400/401/403/404/405/429)
-```json
-{
-  "error": "string"  // or "message": "string"
-}
-```
-
----
-
-## Test Execution Notes
-
-1. **Pre-request Setup:**
-   - User must be logged in and have valid JWT token
-   - Test orders must be created in various states (pending, confirmed, shipping, delivered, cancelled)
-   - Set `Authorization: Bearer {{token}}` header
-   - Set `X-Student-Id` header in all requests
-
-2. **Postman Variables:**
-   ```
-   {{baseUrl}} = http://localhost:3000
-   {{studentId}} = <Your Student ID>
-   {{authToken}} = <JWT token from login>
-   {{orderId}} = <Test order ID>
-   ```
-
-3. **Test Execution Order:**
-   - Run TC-CANCEL-013/014/015 first to verify auth requirements
-   - Run TC-CANCEL-006 to verify 404 handling
-   - Run TC-CANCEL-001 first for valid cancellation
-   - Run TC-CANCEL-003/004 for invalid state transitions
-   - Run security tests (TC-CANCEL-011, TC-CANCEL-016)
-   - Use Collection Runner for batch execution
-
-4. **State Management:**
-   - Create fresh orders for each state transition test
-   - Some tests may modify order state affecting subsequent tests
-   - Consider using data-driven approach with different order states
-
-5. **State Transition Tests Dependency:**
-   - TC-CANCEL-003 requires order in "shipping" state
-   - TC-CANCEL-004 requires order in "delivered" state
-   - TC-CANCEL-005 requires order already cancelled
-   - TC-CANCEL-040 requires order > 24 hours old
+The student reviewed the generated cases against the actual API behavior and removed or revised cases that depended on unsupported assumptions. Expected results were changed from broad alternatives such as 400 or 404 to the status code actually defined or observed for the SUT. State-transition cases were aligned with the actual cancellation rules, while authentication and authorization cases were retained only where the API/SUT provided evidence for the behavior. Additional manually designed cases were then added to cover gaps identified during the review, particularly authorization-header behavior, HTTP method enforcement, and explicit response-schema validation.
 
 Tool: Cursor AI
 Time: 2026-08-28 21:50:00 (UTC+7)
@@ -1908,7 +908,6 @@ Output: |
   - `FR3_Local.postman_environment.json`
 
   Generated content summary:
-  - Created 45 forgot-password test cases.
   - Covered valid seeded emails, invalid email format partitions, missing/null
     email, wrong JSON schema, malformed JSON, wrong HTTP methods, wrong or
     missing content type, SQL injection, XSS/HTML injection, command-like
@@ -1935,3 +934,1025 @@ Output: |
     information-disclosure/account-enumeration test.
   - The backend does not appear to implement forgot-password rate limiting.
     TC-FP-040 expects `429 Too Many Requests` to expose that missing control.
+
+
+Tool:Chat GPT
+Time: 13:00 29/8/2026
+Prompt: give me 1 file md only Generate Skill.Md to generate test cases for the API (target ≥ 35 per API). The cases must cover: domain partitions on every parameter (e.g., email format, password complexity, price > 0), state transitions (FR-10: pending → confirmed → shipping → delivered, plus cancelation rules), security (SEC-01–SEC-07, e.g., SQL injection, IDOR, role escalation), and schema validation (the response shape exactly matches the spec). , it read api specification, understand specification, udnerstand api contract, design testcases and output to testcases.md, then generate tests json collection and postman colleciton json
+Output:  # SKILL.md — AI-Driven API Test Generator
+
+## 1. Skill Name
+
+AI-Driven API Test Generator
+
+---
+
+## 2. Purpose
+
+This skill generates comprehensive API test cases for **user-selected
+endpoints** from an API specification.
+
+The skill does NOT automatically generate tests for every endpoint in the
+API specification.
+
+The user provides:
+
+1. An API specification.
+2. One or more target endpoints.
+
+The agent then:
+
+1. Reads the API specification.
+2. Finds the requested endpoints.
+3. Understands the API specification for those endpoints.
+4. Extracts the API contract.
+5. Designs at least 35 test cases per selected endpoint.
+6. Validates test coverage.
+7. Generates `testcases.md`.
+8. Generates `tests.json`.
+9. Generates `postman_collection.json`.
+
+---
+
+## 3. Input
+
+The skill accepts:
+
+```text
+API Specification
++
+Target Endpoint(s)
+```
+
+Example:
+
+```
+API Specification:
+openapi.yaml
+
+Target endpoints:
+POST /api/forgot-password
+PUT /api/orders/{id}/cancel
+```
+
+Another example:
+
+```
+API Specification:
+openapi.yaml
+
+Target endpoint:
+PUT /api/orders/{id}/cancel
+```
+
+The agent must only generate tests for the endpoint(s) explicitly provided
+by the user.
+
+---
+
+## 4. Endpoint Selection
+
+The user may provide:
+
+Method + Path
+
+Example:
+
+```
+POST /api/forgot-password
+```
+
+or:
+
+```
+PUT /api/orders/{id}/cancel
+```
+
+The endpoint must be matched against the API specification.
+
+Matching should consider:
+
+```
+HTTP method
++
+endpoint path
+```
+
+Example:
+
+User input:
+
+```
+PUT /api/orders/{id}/cancel
+```
+
+Specification:
+
+```
+/api/orders/{id}/cancel:
+  put:
+    ...
+```
+
+The agent selects only this operation.
+
+## 5. Endpoint Validation
+
+Before generating tests, verify that every requested endpoint exists in the
+API specification.
+
+For each requested endpoint:
+
+```
+IF endpoint exists:
+
+    Continue
+
+ELSE:
+
+    Report:
+    "Endpoint not found in API specification"
+
+    Do not generate tests for that endpoint.
+```
+
+Example:
+
+Requested:
+
+```
+PUT /api/orders/{id}/cancel
+```
+
+Result:
+
+```
+✓ Endpoint found
+✓ HTTP method found
+✓ API contract extracted
+```
+
+## 6. Read API Specification
+
+Read the API specification as the source of truth.
+
+Only inspect the parts necessary to understand the selected endpoint, including:
+
+```
+HTTP method
+Path
+Operation ID
+Description
+Path parameters
+Query parameters
+Headers
+Request body
+Content type
+Request schema
+Required fields
+Optional fields
+Data types
+Formats
+Minimum values
+Maximum values
+Minimum lengths
+Maximum lengths
+Patterns
+Enumerations
+Authentication
+Authorization
+Business rules
+Response status codes
+Response schemas
+Error schemas
+Response headers
+Examples
+```
+
+Do not generate tests for unrelated endpoints.
+
+## 7. Understand API Contract
+
+For each selected endpoint, create an internal API contract.
+
+The contract should contain:
+
+```
+Endpoint
+HTTP Method
+Path Parameters
+Query Parameters
+Headers
+Request Body
+Authentication
+Authorization
+Input Constraints
+Business Rules
+Success Responses
+Error Responses
+Response Schemas
+```
+
+Example:
+
+```json
+{
+  "method": "PUT",
+  "path": "/api/orders/{id}/cancel",
+  "parameters": {
+    "id": {
+      "location": "path",
+      "required": true,
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "authentication": true,
+  "responses": {
+    "200": {},
+    "400": {},
+    "401": {},
+    "403": {},
+    "404": {}
+  }
+}
+```
+
+## 8. Test Case Target
+
+Generate:
+
+```
+>= 35 test cases per selected endpoint
+```
+
+If multiple endpoints are provided:
+
+```
+Endpoint 1 → >= 35 tests
+Endpoint 2 → >= 35 tests
+Endpoint 3 → >= 35 tests
+```
+
+Do not combine the test count across endpoints.
+
+For example:
+
+```
+POST /api/login
+35 tests
+
+PUT /api/orders/{id}/cancel
+35 tests
+
+Total:
+70 tests
+```
+
+## 9. Domain Partition Testing
+
+Domain partition testing is mandatory for every applicable parameter.
+
+For every parameter, identify valid and invalid partitions.
+
+Consider:
+
+```
+Valid values
+Invalid values
+Boundary values
+Below minimum
+Above maximum
+Empty values
+Null values
+Missing values
+Wrong data types
+Invalid formats
+Special characters
+```
+
+Only use constraints defined by the API specification.
+
+## 10. Parameter Examples
+
+### Email
+
+For an email parameter, consider:
+
+```
+Valid email
+Invalid email format
+Missing @
+Missing local part
+Missing domain
+Multiple @
+Empty email
+Null email
+Missing email
+Very long email
+Wrong data type
+```
+
+Example:
+
+```
+test@example.com
+invalid-email
+@example.com
+test@
+test@@example.com
+""
+null
+```
+
+### Password
+
+If password constraints exist, cover:
+
+```
+Valid password
+Minimum valid length
+Maximum valid length
+Below minimum
+Above maximum
+Missing uppercase
+Missing lowercase
+Missing number
+Missing special character
+Empty password
+Null password
+Missing password
+Wrong data type
+```
+
+Do not invent password rules not defined by the specification.
+
+### Numeric Parameters
+
+For parameters such as:
+
+```
+price > 0
+```
+
+cover:
+
+```
+Positive value
+Minimum valid value
+Zero
+Negative value
+Maximum valid value
+Above maximum
+Decimal
+Null
+Missing
+String
+Boolean
+```
+
+### ID Parameters
+
+For IDs, consider:
+
+```
+Valid existing ID
+Non-existing ID
+Minimum ID
+Zero
+Negative ID
+Decimal ID
+Very large ID
+String
+Null
+Missing
+Special characters
+```
+
+## 11. Required and Optional Fields
+
+For every required field:
+
+```
+Valid value
+Missing field
+Null
+Empty value where applicable
+Invalid type
+Invalid format
+Boundary value
+Out-of-range value
+```
+
+For optional fields:
+
+```
+Field omitted
+Valid value
+Invalid value
+Null if allowed
+Boundary values
+```
+
+## 12. Request Body Testing
+
+For request bodies, generate tests for:
+
+```
+Valid request
+Missing required field
+Multiple missing fields
+Optional field omitted
+Null field
+Empty field
+Wrong data type
+Invalid format
+Boundary values
+Invalid enum
+Malformed JSON
+Empty object
+Empty body
+Unexpected additional field
+```
+
+## 13. State Transition Testing
+
+State transition testing is mandatory for selected endpoints that operate on
+stateful resources.
+
+For FR-10 order APIs, consider:
+
+```
+pending
+confirmed
+shipping
+delivered
+```
+
+Normal lifecycle:
+
+```
+pending
+   |
+   v
+confirmed
+   |
+   v
+shipping
+   |
+   v
+delivered
+```
+
+Generate tests for valid and invalid transitions according to the API
+specification.
+
+## 14. FR-10 Cancellation Rules
+
+For an order cancellation endpoint, generate tests for applicable states:
+
+```
+Cancel pending order
+Cancel confirmed order
+Cancel shipping order
+Cancel delivered order
+Cancel already cancelled order
+Repeated cancellation
+Invalid cancellation transition
+```
+
+Each state test should specify:
+
+```
+Initial State
+Action
+Expected Status Code
+Expected Response
+Expected Final State
+```
+
+Do not invent cancellation rules.
+
+If the API specification does not define the rule, mark:
+
+```
+Not specified by API contract
+```
+
+## 15. Security Testing
+
+Security testing must cover the following categories where applicable:
+
+```
+SEC-01 — SQL Injection
+SEC-02 — XSS
+SEC-03 — IDOR
+SEC-04 — Authentication Bypass
+SEC-05 — Role Escalation
+SEC-06 — Parameter Manipulation
+SEC-07 — Malformed / Abusive Input
+```
+
+## 16. SEC-01 — SQL Injection
+
+Test applicable input locations:
+
+```
+Path parameters
+Query parameters
+Request body
+Search parameters
+IDs
+```
+
+Example:
+
+```
+' OR '1'='1
+1 UNION SELECT *
+```
+
+## 17. SEC-02 — XSS
+
+Test user-controlled input.
+
+Example:
+
+```
+<script>alert(1)</script>
+```
+
+Verify that the API handles the input according to the contract and does not
+incorrectly expose unsafe content.
+
+## 18. SEC-03 — IDOR
+
+For resources belonging to users, test:
+
+```
+User A token
++
+User B resource ID
+```
+
+Verify that unauthorized access or modification is rejected.
+
+## 19. SEC-04 — Authentication Bypass
+
+Test:
+
+```
+No token
+Empty token
+Invalid token
+Malformed token
+Expired token
+Wrong authentication scheme
+```
+
+## 20. SEC-05 — Role Escalation
+
+Test unauthorized roles against protected operations.
+
+Examples:
+
+```
+Normal user → admin operation
+Wrong role
+Missing role
+Manipulated role
+```
+
+## 21. SEC-06 — Parameter Manipulation
+
+Test security-sensitive parameters such as:
+
+```
+ID
+User ID
+Role
+Status
+Price
+Ownership
+Permission
+```
+
+## 22. SEC-07 — Malformed / Abusive Input
+
+Test:
+
+```
+Very long input
+Malformed JSON
+Unexpected Content-Type
+Special characters
+Unicode
+Unexpected fields
+Invalid encoding
+```
+
+## 23. Response Schema Validation
+
+Every documented response schema must be tested.
+
+Validate:
+
+```
+HTTP status code
+Content-Type
+Response shape
+Required properties
+Property names
+Property types
+Nested objects
+Arrays
+Enums
+Nullable fields
+Additional properties
+```
+
+The response must match the API specification exactly when the specification
+defines an exact schema.
+
+## 24. Error Schema Validation
+
+For every documented error response, validate:
+
+```
+Status code
+Content-Type
+Response body
+Required error fields
+Field types
+Error schema
+```
+
+## 25. Test Case Structure
+
+Every test case must contain:
+
+```
+Test Case ID
+Test Case
+API
+Method
+Category
+Objective
+Test Data
+Preconditions
+Expected Result
+Expected Status Code
+Schema Validation
+Security ID
+Initial State
+Expected Final State
+```
+
+Fields that are not applicable should contain:
+
+```
+N/A
+```
+
+## 26. Test Case IDs
+
+Use:
+
+```
+TC-{API_IDENTIFIER}-{NUMBER}
+```
+
+Example:
+
+```
+TC-CANCEL-001
+TC-CANCEL-002
+TC-CANCEL-003
+...
+TC-CANCEL-035
+```
+
+IDs must be unique.
+
+## 27. Test Coverage Validation
+
+After generation, calculate coverage for the selected endpoint.
+
+Check:
+
+```
+Parameter coverage
+Domain partition coverage
+Boundary coverage
+Required field coverage
+Optional field coverage
+Data type coverage
+State transition coverage
+Cancellation coverage
+Security coverage
+Success schema coverage
+Error schema coverage
+```
+
+## 28. Coverage Repair
+
+If fewer than 35 test cases exist:
+
+```
+WHILE testCaseCount < 35:
+
+    missingCoverage ← IdentifyMissingCoverage()
+
+    additionalTests ← GenerateTests(
+        APIContract,
+        missingCoverage
+    )
+
+    Add(additionalTests)
+
+    RemoveDuplicates()
+
+END WHILE
+```
+
+The agent should prioritize missing coverage rather than creating meaningless
+duplicates.
+
+## 29. Duplicate Removal
+
+Remove tests with the same testing purpose.
+
+Compare:
+
+```
+Purpose
+Input partition
+Expected behavior
+State
+Security category
+```
+
+Different values should not automatically be treated as different tests if
+they belong to the same equivalence partition.
+
+## 30. Final Test Validation
+
+Before output, validate every test:
+
+```
+Unique ID
+Correct endpoint
+Correct HTTP method
+Valid test data
+Explicit expected result
+Expected status code
+Correct category
+Contract traceability
+No unsupported assumptions
+No duplicate purpose
+```
+
+## 31. Output: testcases.md
+
+Generate:
+
+```
+testcases.md
+```
+
+Structure:
+
+```
+# API Test Cases
+
+## 1. Selected Endpoint
+
+## 2. API Contract
+
+## 3. Test Design Strategy
+
+## 4. Coverage Summary
+
+## 5. Test Cases
+
+| Test Case ID | Test Case | API | Method | Category | Objective | Test Data | Preconditions | Expected Result | Expected Status | Schema Validation | Security ID | Initial State | Expected Final State |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+
+## 6. Coverage Matrix
+
+## 7. Assumptions and Limitations
+```
+
+Only selected endpoints must appear in this file.
+
+## 32. Output: tests.json
+
+Generate:
+
+```
+tests.json
+```
+
+Example:
+
+```json
+{
+  "api": {
+    "method": "PUT",
+    "path": "/api/orders/{id}/cancel"
+  },
+  "totalTestCases": 35,
+  "testCases": [
+    {
+      "id": "TC-CANCEL-001",
+      "name": "Cancel valid pending order",
+      "method": "PUT",
+      "path": "/api/orders/{id}/cancel",
+      "category": "Positive",
+      "objective": "Verify cancellation of a valid order",
+      "testData": {
+        "id": 1
+      },
+      "preconditions": [
+        "Valid authenticated user",
+        "Order is cancellable"
+      ],
+      "expectedStatus": 200,
+      "expectedResult": "Order is cancelled",
+      "schemaValidation": true,
+      "securityId": null,
+      "initialState": "pending",
+      "expectedFinalState": "cancelled"
+    }
+  ]
+}
+```
+
+The actual file must contain all generated test cases.
+
+## 33. Output: Postman Collection
+
+Generate:
+
+```
+postman_collection.json
+```
+
+Use Postman Collection Schema v2.1.
+
+Example:
+
+```json
+{
+  "info": {
+    "name": "AI Generated API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": []
+}
+```
+
+Create one Postman request for every test case.
+
+Each request should contain:
+
+```
+Request name
+HTTP method
+URL
+Path variables
+Query parameters
+Headers
+Authentication
+Request body
+Postman test scripts
+```
+
+## 34. Postman Assertions
+
+For status validation:
+
+```javascript
+pm.test("Status code is expected", function () {
+    pm.expect(pm.response.code).to.eql(200);
+});
+```
+
+For response schema validation, validate the required properties and types.
+
+Example:
+
+```javascript
+const response = pm.response.json();
+
+pm.test("Response contains id", function () {
+    pm.expect(response).to.have.property("id");
+});
+
+pm.test("id is a number", function () {
+    pm.expect(response.id).to.be.a("number");
+});
+```
+
+When a JSON schema exists, prefer JSON Schema validation.
+
+## 35. Environment Variables
+
+Use reusable Postman variables:
+
+```
+{{baseUrl}}
+{{token}}
+{{userToken}}
+{{adminToken}}
+{{orderId}}
+```
+
+Never hard-code secrets.
+
+## 37. Example Usage
+
+The user provides:
+
+```
+Specification:
+openapi.yaml
+
+Endpoints:
+POST /api/forgot-password
+PUT /api/orders/{id}/cancel
+```
+
+The agent must generate:
+
+```
+testcases.md
+
+    Forgot Password
+        >= 35 tests
+
+    Cancel Order
+        >= 35 tests
+
+
+tests.json
+
+    Forgot Password tests
+    Cancel Order tests
+
+
+postman_collection.json
+
+    Forgot Password requests
+    Cancel Order requests
+```
+
+The agent must NOT generate tests for:
+
+```
+/api/login
+/api/register
+/api/products
+/api/cart
+/api/checkout
+```
+
+unless the user explicitly selects those endpoints.
+
+## 38. Final Validation Checklist
+
+Before completing the task:
+
+```
+[ ] API specification parsed
+[ ] Requested endpoints identified
+[ ] Only requested endpoints processed
+[ ] API contract extracted
+[ ] Every applicable parameter analyzed
+[ ] Domain partitions covered
+[ ] Boundary values covered
+[ ] Required fields covered
+[ ] Optional fields covered
+[ ] Data types covered
+[ ] State transitions covered where applicable
+[ ] FR-10 states covered where applicable
+[ ] Cancellation rules covered where applicable
+[ ] SEC-01 covered where applicable
+[ ] SEC-02 covered where applicable
+[ ] SEC-03 covered where applicable
+[ ] SEC-04 covered where applicable
+[ ] SEC-05 covered where applicable
+[ ] SEC-06 covered where applicable
+[ ] SEC-07 covered where applicable
+[ ] Success response schema covered
+[ ] Error response schema covered
+[ ] >= 35 tests per selected endpoint
+[ ] Duplicate tests removed
+[ ] Unique test IDs
+[ ] testcases.md generated
+[ ] tests.json generated
+[ ] postman_collection.json generated
+[ ] Postman Collection v2.1
+[ ] No hard-coded secrets
+```
+
