@@ -34,11 +34,11 @@ jobs:
       # Backend
       # =========================
       - name: Install backend dependencies
-        working-directory: eshop-sut/backend
+        working-directory: eshop/backend
         run: npm ci
 
       - name: Start backend
-        working-directory: eshop-sut/backend
+        working-directory: eshop/backend
         run: |
           npm start > backend.log 2>&1 &
 
@@ -58,7 +58,7 @@ jobs:
 
           echo "Backend failed to start."
           echo "========== Backend log =========="
-          cat eshop-sut/backend/backend.log
+          cat eshop/backend/backend.log
           exit 1
 
       # =========================
