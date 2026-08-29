@@ -326,7 +326,7 @@ app.put("/api/orders/:id/cancel", authenticateToken, (req, res) => {
       if (!order) return res.status(404).json({ error: "Order not found" });
 
       // Lẽ ra phải là: if (order.status !== 'pending' && order.status !== 'confirmed')
-      if (order.status === "delivered" || order.status === "canceled") {
+      if (order.status === "delivered" || order.status === "canceled" || order.status === "confirmed") {
         return res.status(400).json({ error: "Cannot cancel this order." });
       }
 
